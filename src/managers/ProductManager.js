@@ -15,14 +15,8 @@ class ProductManager {
   // Crea un producto
   async add(datos) {
     const requeridos = [
-      'title',
-      'description',
-      'code',
-      'price',
-      'status',
-      'stock',
-      'category',
-      'drop'
+      'title', 'description', 'code', 'price', 
+      'status', 'stock', 'category', 'drop'
     ];
 
     for (const campo of requeridos) {
@@ -32,6 +26,7 @@ class ProductManager {
     const existe = await ProductModel.findOne({ code: String(datos.code) }).lean();
     if (existe) throw new Error('El "code" ya existe, debe ser único');
 
+    // Mongoose.create ya devuelve el objeto guardado
     const nuevo = await ProductModel.create({
       title: String(datos.title),
       description: String(datos.description),
@@ -44,7 +39,7 @@ class ProductManager {
       thumbnails: Array.isArray(datos.thumbnails) ? datos.thumbnails.map(String) : []
     });
 
-    return nuevo.toObject();
+    return nuevo.toObject(); // Aseguramos que sea un objeto plano
   }
 
   // Actualiza un producto por ID 
@@ -62,7 +57,6 @@ class ProductManager {
     }
 
     const toSet = {};
-
     if (cambios.title !== undefined) toSet.title = String(cambios.title);
     if (cambios.description !== undefined) toSet.description = String(cambios.description);
     if (cambios.code !== undefined) toSet.code = String(cambios.code);
@@ -72,10 +66,8 @@ class ProductManager {
     if (cambios.category !== undefined) toSet.category = String(cambios.category);
     if (cambios.drop !== undefined) toSet.drop = Number(cambios.drop);
 
-    if (cambios.thumbnails !== undefined) {
-      if (Array.isArray(cambios.thumbnails)) {
+    if (cambios.thumbnails !== undefined && Array.isArray(cambios.thumbnails)) {
         toSet.thumbnails = cambios.thumbnails.map(String);
-      }
     }
 
     const actualizado = await ProductModel.findByIdAndUpdate(
