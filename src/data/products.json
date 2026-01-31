@@ -1,0 +1,86 @@
+[
+  {
+    "id": "1",
+    "title": "Classic Tee Red Peppper",
+    "description": "Remera clásica de algodón con gráfica Red Pepper.",
+    "code": "PS-TS-RED-001",
+    "price": 35000,
+    "stock": 30,
+    "category": "remeras",
+    "status": true,
+    "drop": 1,
+    "thumbnails": [
+      "4.jpg"
+    ]
+  },
+  {
+    "id": "2",
+    "title": "Tee Carry Pepper",
+    "description": "Remera relaxed fit con ilustración Carry Pepper.",
+    "code": "PS-TS-CARRY-001",
+    "price": 35000,
+    "stock": 25,
+    "category": "remeras",
+    "status": true,
+    "drop": 1,
+    "thumbnails": [
+      "5.jpg"
+    ]
+  },
+  {
+    "id": "3",
+    "title": "Hoodie Be Hot",
+    "description": "Hoodie oversize con estampa trasera Be Hot.",
+    "code": "PS-HD-BEHOT-001",
+    "price": 70000,
+    "stock": 15,
+    "category": "buzos",
+    "status": true,
+    "drop": 1,
+    "thumbnails": [
+      "2.jpg"
+    ]
+  },
+  {
+    "id": "4",
+    "title": "Gorra Pepper Studio",
+    "description": "Gorra de algodón con bordado Pepper Studio.",
+    "code": "PS-CAP-PS-001",
+    "price": 20000,
+    "stock": 20,
+    "category": "accesorios",
+    "status": true,
+    "drop": 1,
+    "thumbnails": [
+      "1.jpg"
+    ]
+  },
+  {
+    "id": "5",
+    "title": "Sweater Pepper Studio",
+    "description": "Sweater tejido con logo Pepper Studio en relieve.",
+    "code": "PS-SW-PS-001",
+    "price": 85000,
+    "stock": 10,
+    "category": "sweaters",
+    "status": true,
+    "drop": 1,
+    "thumbnails": [
+      "6.jpg"
+    ]
+  },
+  {
+    "id": "6",
+    "title": "Jean Carry Pepper",
+    "description": "Jean straight fit con gráfica Carry Pepper lateral.",
+    "code": "PS-JN-CARRY-001",
+    "price": 120000,
+    "stock": 12,
+    "category": "jeans",
+    "status": true,
+    "drop": 1,
+    "thumbnails": [
+      "3.jpg"
+    ]
+  }
+]

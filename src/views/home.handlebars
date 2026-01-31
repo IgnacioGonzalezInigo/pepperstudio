@@ -1,0 +1,159 @@
+<div class="hero-wrapper">
+
+  <div class="brand-nav">
+    <div class="container d-flex align-items-center justify-content-between">
+
+      <div class="d-flex gap-3">
+        <a class="brand-link" href="/products">Shop</a>
+        <a class="brand-link" href="#lookbook">Lookbook</a>
+      </div>
+
+      <a class="brand-logo" href="/">PEPPER STUDIO</a>
+
+      <div class="d-flex gap-3">
+        <a class="brand-link" href="/login">Login</a>
+        <a class="brand-link" href="/cart">Cart</a>
+      </div>
+
+    </div>
+  </div>
+
+  <section class="hero">
+    <div class="hero-content">
+      <div style="max-width: 720px;">
+        <div class="section-title mb-2 text-white-50">
+          Drop · Verano 2026
+        </div>
+
+        <h1 class="display-6 mb-2">
+          Nueva capsula disponible
+        </h1>
+
+        <a href="#drop" class="btn btn-outline-light">
+          Explora la nueva coleccion
+        </a>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="container py-5">
+
+  <section id="drop" class="mb-5">
+    <div class="d-flex align-items-end justify-content-between mb-3">
+      <div>
+        <div class="section-title">Nuevo!</div>
+        <div class="fw-semibold">DROP {{dropActual}}</div>
+      </div>
+
+      <a href="/realtimeproducts" class="text-decoration-none small text-muted">
+        Admin realtime →
+      </a>
+    </div>
+
+    {{#if dropChunks.length}}
+      <div id="dropCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+
+          {{#each dropChunks}}
+            <div class="carousel-item {{#if @first}}active{{/if}}">
+              <div class="row g-3">
+                {{#each this}}
+                  <div class="col-12 col-md-6 col-lg-3">
+                    <div class="p-card h-100">
+                      <img
+                        class="p-img"
+                        src="{{#if this.thumbnails.[0]}}/img/{{this.thumbnails.[0]}}{{else}}/img/products/placeholder.jpg{{/if}}"
+                        alt="{{this.title}}"
+                      >
+
+                      <div class="p-body">
+                        <p class="p-name">{{this.title}}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div class="p-price">${{this.price}} ARS</div>
+                          <button class="btn btn-sm btn-dark js-add-to-cart" data-pid="{{this._id}}">
+                            Agregar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {{/each}}
+              </div>
+            </div>
+          {{/each}}
+
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#dropCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+
+        <button class="carousel-control-next" type="button" data-bs-target="#dropCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+    {{else}}
+      <div class="alert alert-light border">No hay productos cargados para el drop.</div>
+    {{/if}}
+  </section>
+
+  <section class="mb-5" id="lookbook">
+    <div class="d-flex align-items-end justify-content-between mb-3">
+      <div>
+        <div class="section-title">LOOKBOOK</div>
+        <div class="fw-semibold">SS2026</div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-12 col-md-4">
+        <div class="tile shadow-sm">
+          <img src="/img/lookbook/lookbook1.jpeg" alt="Lookbook 1">
+          <div class="tile-label">GORRA "pepper studio"</div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="tile shadow-sm">
+          <img src="/img/lookbook/lookbook2.png" alt="Lookbook 2">
+          <div class="tile-label">HOODIE "be hot"</div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="tile shadow-sm">
+          <img src="/img/lookbook/lookbook3.jpg" alt="Lookbook 3">
+          <div class="tile-label">JEAN "carry pepper"</div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="tile shadow-sm">
+          <img src="/img/lookbook/lookbook4.jpg" alt="Lookbook 4">
+          <div class="tile-label">CLASSIC TEE "red pepper"</div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4" >
+        <div class="tile shadow-sm">
+          <img src="/img/lookbook/lookbook5.jpg" alt="Lookbook 5">
+          <div class="tile-label">TEE "carry pepper"</div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="tile shadow-sm">
+          <img src="/img/lookbook/lookbook6.png" alt="Lookbook 6">
+          <div class="tile-label">SWEATER "pepper studio"</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script type="module" src="/js/cart/cartClient.js"></script>

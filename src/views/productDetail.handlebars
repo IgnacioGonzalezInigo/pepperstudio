@@ -1,0 +1,52 @@
+<div class="hero-wrapper">
+  <div class="brand-nav">
+    <div class="container d-flex align-items-center justify-content-between">
+      <div class="d-flex gap-3">
+        <a class="brand-link" href="/">Shop</a>
+        <a class="brand-link" href="/products">Products</a>
+      </div>
+
+      <a class="brand-logo" href="/">PEPPER STUDIO</a>
+
+      <div class="d-flex gap-3">
+        <a class="brand-link" href="/login">Login</a>
+        <a class="brand-link" href="/cart">Cart</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <a class="btn btn-outline-secondary" href="/products">← Volver</a>
+    <a class="btn btn-outline-secondary" href="/">Home</a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-12 col-md-6">
+      <div class="p-card">
+        <img
+          class="p-img"
+          style="height:420px"
+          src="{{#if product.thumbnails.[0]}}/img/{{product.thumbnails.[0]}}{{else}}/img/products/placeholder.jpg{{/if}}"
+          alt="{{product.title}}"
+        >
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <h1 class="h3">{{product.title}}</h1>
+      <p class="text-muted mb-2">{{product.category}} · drop {{product.drop}}</p>
+      <p class="mb-3">{{product.description}}</p>
+
+      <div class="h5 mb-3">${{product.price}} ARS</div>
+      <div class="text-muted small mb-4">Stock: {{product.stock}} · Status: {{product.status}}</div>
+
+      <button class="btn btn-dark js-add-to-cart" data-pid="{{product._id}}">
+        Agregar al carrito
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/js/cart/cartClient.js"></script>

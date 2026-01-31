@@ -1,0 +1,115 @@
+<div class="hero-wrapper">
+  <div class="brand-nav">
+    <div class="container d-flex align-items-center justify-content-between">
+      <div class="d-flex gap-3">
+        <a class="brand-link" href="/">Shop</a>
+        <a class="brand-link" href="/products">Products</a>
+      </div>
+
+      <a class="brand-logo" href="/">PEPPER STUDIO</a>
+
+      <div class="d-flex gap-3">
+        <a class="brand-link" href="/login">Login</a>
+        <a class="brand-link" href="/cart">Cart</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h1 class="h3 mb-1">Productos</h1>
+      <p class="text-muted mb-0">Listado con paginación</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="/">Volver a Home</a>
+  </div>
+
+  <form class="row g-2 mb-4" method="GET" action="/products">
+    <div class="col-12 col-md-5">
+      <input
+        class="form-control"
+        name="query"
+        placeholder="Categoría o available/unavailable"
+        value="{{queryValue}}"
+      />
+    </div>
+
+    <div class="col-6 col-md-2">
+      <select class="form-select" name="sort">
+        <option value="" {{#unless sortValue}}selected{{/unless}}>Sin orden</option>
+        <option value="asc" {{#if (eq sortValue "asc")}}selected{{/if}}>Precio ↑</option>
+        <option value="desc" {{#if (eq sortValue "desc")}}selected{{/if}}>Precio ↓</option>
+      </select>
+      <div class="form-text">Actual: {{sortValue}}</div>
+    </div>
+
+    <div class="col-6 col-md-2">
+      <input class="form-control" type="number" min="1" name="limit" value="{{limit}}" />
+      <div class="form-text">Items por página</div>
+    </div>
+
+    <div class="col-12 col-md-3 d-grid">
+      <button class="btn btn-dark" type="submit">Aplicar</button>
+    </div>
+  </form>
+
+  {{#if products.length}}
+    <div class="row g-3">
+      {{#each products}}
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="p-card h-100">
+            <img
+              class="p-img"
+              src="{{#if this.thumbnails.[0]}}/img/{{this.thumbnails.[0]}}{{else}}/img/products/placeholder.jpg{{/if}}"
+              alt="{{this.title}}"
+            >
+
+            <div class="p-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="p-name mb-1">{{this.title}}</p>
+                  <div class="small text-muted">{{this.category}} · stock {{this.stock}}</div>
+                </div>
+                <div class="p-price">${{this.price}} ARS</div>
+              </div>
+
+              <div class="d-flex gap-2 mt-3">
+                <a class="btn btn-sm btn-outline-secondary" href="/products/{{this._id}}">
+                  Ver detalle
+                </a>
+                <button class="btn btn-sm btn-dark js-add-to-cart" data-pid="{{this._id}}">
+                  Agregar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+
+    <div class="d-flex align-items-center justify-content-between mt-4">
+      <div class="text-muted small">
+        Página {{page}} / {{totalPages}}
+      </div>
+
+      <div class="d-flex gap-2">
+        {{#if hasPrevPage}}
+          <a class="btn btn-outline-secondary btn-sm" href="{{prevLink}}">← Anterior</a>
+        {{else}}
+          <button class="btn btn-outline-secondary btn-sm" disabled>← Anterior</button>
+        {{/if}}
+
+        {{#if hasNextPage}}
+          <a class="btn btn-outline-secondary btn-sm" href="{{nextLink}}">Siguiente →</a>
+        {{else}}
+          <button class="btn btn-outline-secondary btn-sm" disabled>Siguiente →</button>
+        {{/if}}
+      </div>
+    </div>
+  {{else}}
+    <div class="alert alert-light border">No hay productos para mostrar.</div>
+  {{/if}}
+</div>
+
+<script type="module" src="/js/cart/cartClient.js"></script>

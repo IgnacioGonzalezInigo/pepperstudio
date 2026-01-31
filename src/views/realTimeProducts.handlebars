@@ -1,0 +1,327 @@
+<div class="container py-5">
+
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h1 class="h3 mb-1">Admin realtime</h1>
+      <p class="text-muted mb-0">Crear, editar y eliminar productos (Mongo _id)</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="/">Volver a Home</a>
+      <button class="btn btn-dark" type="button" data-bs-toggle="collapse" data-bs-target="#createBox">+</button>
+    </div>
+  </div>
+
+  <div id="alertZone"></div>
+
+  <div class="collapse mb-4" id="createBox">
+    <div class="card shadow-sm">
+      <div class="card-body">
+
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <h2 class="h5 mb-0" id="formTitle">Agregar producto</h2>
+            <div class="text-muted small" id="formSubtitle">Completá los campos y guardá.</div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button id="btnCancelEdit" class="btn btn-sm btn-outline-secondary d-none" type="button">
+              Cancelar edición
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#createBox">
+              Cerrar
+            </button>
+          </div>
+        </div>
+
+        <form id="productForm" class="row g-2">
+          <input type="hidden" name="editId" id="editId" value="" />
+
+          <div class="col-12 col-md-6">
+            <input class="form-control" type="text" name="title" placeholder="Título" required />
+          </div>
+
+          <div class="col-12 col-md-6">
+            <input class="form-control" type="text" name="category" placeholder="Categoría" required />
+          </div>
+
+          <div class="col-12">
+            <input class="form-control" type="text" name="description" placeholder="Descripción" required />
+          </div>
+
+          <div class="col-12 col-md-4">
+            <input class="form-control" type="text" name="code" placeholder="Código (único)" required />
+          </div>
+
+          <div class="col-12 col-md-4">
+            <input class="form-control" type="number" name="price" placeholder="Precio" required />
+          </div>
+
+          <div class="col-12 col-md-4">
+            <input class="form-control" type="number" name="stock" placeholder="Stock" required />
+          </div>
+
+          <div class="col-12 col-md-4">
+            <input class="form-control" type="number" name="drop" placeholder="Drop (ej: 2026)" />
+          </div>
+
+          <div class="col-12 col-md-8">
+            <input class="form-control" type="text" name="thumbnail" placeholder="Thumbnail (opcional, ej: products/pepper.jpg)" />
+          </div>
+
+          <div class="col-12 d-grid">
+            <button id="btnSubmit" class="btn btn-primary" type="submit">Agregar</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Productos</h2>
+      <div id="productsContainer"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+
+  const alertZone = document.getElementById('alertZone');
+  const form = document.getElementById('productForm');
+  const container = document.getElementById('productsContainer');
+
+  const createBoxEl = document.getElementById('createBox');
+  const formTitle = document.getElementById('formTitle');
+  const formSubtitle = document.getElementById('formSubtitle');
+  const btnSubmit = document.getElementById('btnSubmit');
+  const btnCancelEdit = document.getElementById('btnCancelEdit');
+  const editIdInput = document.getElementById('editId');
+
+  let productsCache = [];
+
+  function isBadId(id) {
+    return !id || String(id).trim() === '' || String(id).trim() === 'undefined' || String(id).trim() === 'null';
+  }
+
+  function showAlert(message, type = 'danger') {
+    alertZone.innerHTML = `
+      <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    `;
+  }
+
+  function openForm() {
+    const inst = window.bootstrap?.Collapse?.getOrCreateInstance(createBoxEl);
+    if (inst) inst.show();
+  }
+
+  function setModeCreate() {
+    editIdInput.value = '';
+    formTitle.textContent = 'Agregar producto';
+    formSubtitle.textContent = 'Completá los campos y guardá.';
+    btnSubmit.textContent = 'Agregar';
+    btnCancelEdit.classList.add('d-none');
+    form.code.removeAttribute('disabled');
+    form.reset();
+  }
+
+  function setModeEdit(product) {
+    editIdInput.value = String(product._id);
+    formTitle.textContent = 'Editar producto';
+    formSubtitle.textContent = `Editando ID: ${product._id}`;
+    btnSubmit.textContent = 'Actualizar';
+    btnCancelEdit.classList.remove('d-none');
+
+    form.title.value = product.title ?? '';
+    form.category.value = product.category ?? '';
+    form.description.value = product.description ?? '';
+    form.code.value = product.code ?? '';
+    form.price.value = product.price ?? '';
+    form.stock.value = product.stock ?? '';
+    form.drop.value = product.drop ?? '';
+
+    const thumb0 = Array.isArray(product.thumbnails) && product.thumbnails.length ? product.thumbnails[0] : '';
+    form.thumbnail.value = thumb0;
+
+    form.code.setAttribute('disabled', 'disabled');
+  }
+
+  function payloadFromForm() {
+    const thumb = (form.thumbnail.value || '').trim();
+    return {
+      title: form.title.value.trim(),
+      description: form.description.value.trim(),
+      code: form.code.value.trim(),
+      price: Number(form.price.value),
+      stock: Number(form.stock.value),
+      category: form.category.value.trim(),
+      status: true,
+      drop: form.drop.value ? Number(form.drop.value) : undefined,
+      thumbnails: thumb ? [thumb] : []
+    };
+  }
+
+  function buildChanges(original, next) {
+    const changes = {};
+
+    const keys = ['title','description','price','stock','category','drop','thumbnails','status'];
+    for (const k of keys) {
+      const a = original?.[k];
+      const b = next?.[k];
+
+      if (k === 'thumbnails') {
+        const a0 = Array.isArray(a) && a.length ? String(a[0]) : '';
+        const b0 = Array.isArray(b) && b.length ? String(b[0]) : '';
+        if (a0 !== b0) changes.thumbnails = b;
+        continue;
+      }
+
+      if (k === 'drop') {
+        const an = (a === undefined || a === null || a === '') ? undefined : Number(a);
+        const bn = (b === undefined || b === null || b === '') ? undefined : Number(b);
+        if (an !== bn) changes.drop = bn;
+        continue;
+      }
+
+      if (k === 'price' || k === 'stock') {
+        if (Number(a) !== Number(b)) changes[k] = Number(b);
+        continue;
+      }
+
+      if (String(a ?? '') !== String(b ?? '')) changes[k] = b;
+    }
+
+    return changes;
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const editId = editIdInput.value?.trim();
+
+    if (!editId) {
+      socket.emit('createProduct', payloadFromForm());
+      form.reset();
+      return;
+    }
+
+    if (isBadId(editId)) {
+      showAlert('ID inválido (undefined). No puedo actualizar.', 'warning');
+      return;
+    }
+
+    const original = productsCache.find(p => String(p._id) === String(editId));
+    if (!original) {
+      showAlert('No encontré el producto en cache para editar.', 'warning');
+      return;
+    }
+
+    const next = payloadFromForm();
+    next.code = original.code; // porque code está disabled
+
+    const changes = buildChanges(original, next);
+    if (!Object.keys(changes).length) {
+      showAlert('No hay cambios para actualizar.', 'info');
+      return;
+    }
+
+    socket.emit('updateProduct', { id: editId, changes });
+
+    showAlert('Cambios guardados correctamente', 'success');
+
+    setModeCreate();
+
+    const inst = window.bootstrap?.Collapse?.getOrCreateInstance(createBoxEl);
+    if (inst) inst.hide();
+
+  });
+
+  btnCancelEdit.addEventListener('click', () => setModeCreate());
+
+  container.addEventListener('click', (e) => {
+    const btnDelete = e.target.closest('.btnDelete');
+    const btnEdit = e.target.closest('.btnEdit');
+
+    if (btnDelete) {
+      const id = btnDelete.dataset.id;
+      if (isBadId(id)) return showAlert('ID inválido: undefined. Revisá el render.', 'warning');
+      socket.emit('deleteProduct', id);
+      return;
+    }
+
+    if (btnEdit) {
+      const id = btnEdit.dataset.id;
+      if (isBadId(id)) return showAlert('ID inválido: undefined. Revisá el render.', 'warning');
+
+      const product = productsCache.find(p => String(p._id) === String(id));
+      if (!product) return showAlert('No encontré el producto para editar (cache).', 'warning');
+
+      openForm();
+      setModeEdit(product);
+    }
+  });
+
+  socket.on('productsUpdated', (products) => {
+    productsCache = Array.isArray(products) ? products : [];
+
+    if (!productsCache.length) {
+      container.innerHTML = '<div class="alert alert-info mb-0">No hay productos cargados.</div>';
+      return;
+    }
+
+    const rows = productsCache.map(p => {
+      const pidRaw = (p && (p._id ?? p.id));
+      const pid = (pidRaw && pidRaw.toString) ? pidRaw.toString() : String(pidRaw ?? '');
+
+      const canAct = !isBadId(pid);
+
+      return `
+        <tr>
+          <td class="fw-semibold">${p.title ?? ''}</td>
+          <td>${p.category ?? ''}</td>
+          <td class="text-end">$${p.price ?? ''}</td>
+          <td class="text-end">${p.stock ?? ''}</td>
+          <td class="text-muted small">${canAct ? pid : '<span class="text-danger">ID inválido</span>'}</td>
+          <td class="text-end">
+            <div class="d-flex gap-2 justify-content-end">
+              <button class="btn btn-sm btn-outline-secondary btnEdit" data-id="${canAct ? pid : ''}" ${canAct ? '' : 'disabled'}>
+                Editar
+              </button>
+              <button class="btn btn-sm btn-outline-danger btnDelete" data-id="${canAct ? pid : ''}" ${canAct ? '' : 'disabled'}>
+                Eliminar
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    container.innerHTML = `
+      <div class="table-responsive">
+        <table class="table align-middle table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Categoría</th>
+              <th class="text-end">Precio</th>
+              <th class="text-end">Stock</th>
+              <th>ID</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  });
+
+  socket.on('errorMessage', (msg) => showAlert(msg, 'danger'));
+
+  setModeCreate();
+</script>
